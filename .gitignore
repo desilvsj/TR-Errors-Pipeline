@@ -1,0 +1,7 @@
+// Input files
+*.gz
+*.tsv
+*.bam
+*.sam
+*.json
+*.idx

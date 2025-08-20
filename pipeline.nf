@@ -1,7 +1,7 @@
 #!/home/desil/.local/bin/nextflow
 
 //rm -rf .nextflow* work/ results/
-//nextflow run pipeline.nf -profile docker --r1 inputs/example_trimmed_R1.fastq --r2 inputs/example_trimmed_R2.fastq --n  10000 -with-docker tr-errors:latest
+//nextflow run pipeline.nf -profile docker --r1 inputs/example_trimmed_R1.fastq --r2 inputs/example_trimmed_R2.fastq --n  10000 -with-docker tr-errors:latest --unindexed_fasta inputs/allTranscripts.fa
 
 /*
  * Running our consensus
@@ -15,6 +15,7 @@ process consensusBuilder {
     path r1_input
     path r2_input
     val  max_reads
+    path consensus_py
 
   output:
     path 'output.fastq.gz'
@@ -22,7 +23,7 @@ process consensusBuilder {
 
   script:
   """
-  python3 /mnt/c/Janesh/GitHub/TR-Errors-Pipeline-V2/nextflow-pipeline/src/consensus_builder.py $r1_input $r2_input --max-reads $max_reads --fastq-out output.fastq.gz --meta-out metadata.txt.gz
+  python3 $consensus_py $r1_input $r2_input --max-reads $max_reads --fastq-out output.fastq.gz --meta-out metadata.txt.gz
   """
 }
 
@@ -79,9 +80,10 @@ workflow {
   r2_ch = Channel.fromPath(params.r2)
   fasta_ch = Channel.fromPath(params.unindexed_fasta)
   n_max_ch = Channel.of(params.n)
+  consensus_py_ch = Channel.fromPath('src/consensus_builder.py')
 
   // Step 1
-  step1_outputs = consensusBuilder(r1_ch, r2_ch, n_max_ch)
+  step1_outputs = consensusBuilder(r1_ch, r2_ch, n_max_ch, consensus_py_ch)
   dcs_fastq_ch = step1_outputs[0]
 
   // Step 2: run kallisto
