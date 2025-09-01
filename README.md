@@ -2,7 +2,6 @@
 This pipeline aims to streamline the processes outline in [TR-Errors-dev](https://github.com/desilvsj/TR-Errors-dev) into a Nextflow pipeline.
 
 ## Overview
-.
 This repository contains the **Nextflow implementation** of [TR-Errors-dev](https://github.com/desilvsj/TR-Errors-dev)
 It orchestrates multiple stages for analyzing **rolling-circle amplification (RCA) sequencing reads**, building consensus sequences, and refining alignments against reference transcripts.
 
