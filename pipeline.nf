@@ -61,6 +61,27 @@ process kallistoRun {
   """
 }
 
+//python3 src/refiner_v4.py kallisto/pseudoalignments.bam kallisto/allTranscripts.fa -o refined/test -n 10000
+
+// process refiner {
+//   publishDir 'output/Step3', mode: 'copy'
+//   container 'tr-errors:latest'
+
+//   input:
+//     path refiner_py
+//     path pseudoalignments_bam
+//     path allTrasncripts_fa
+//     path max_reads
+    
+
+//   output:
+//     path 'refined.bam'
+
+//   script:
+//   """
+//   python3 $refiner_py $pseudoalignments_bam $allTrasncripts_fa -o refined.bam -n $max_reads
+//   """
+// }
 
 /*
  * Pipeline parameters
@@ -81,17 +102,24 @@ workflow {
   fasta_ch = Channel.fromPath(params.unindexed_fasta)
   n_max_ch = Channel.of(params.n)
   consensus_py_ch = Channel.fromPath('src/consensus_builder.py')
+  refiner_py_ch = Channel.fromPath('src/refiner.py')
 
   // Step 1
   step1_outputs = consensusBuilder(r1_ch, r2_ch, n_max_ch, consensus_py_ch)
   dcs_fastq_ch = step1_outputs[0]
 
   // Step 2: run kallisto
-
   //Step 2.1 Indexing
   step2_1_outputs = kallistoIndex(fasta_ch)
   index_ch = step2_1_outputs[0]
   
   //Step 2.2 Pseudoalignment
-  kallistoRun(index_ch, dcs_fastq_ch)
+  step2_2_outputs = kallistoRun(index_ch, dcs_fastq_ch)
+  pseudoalignments_ch = step2_2_outputs[0]
+
+  // //Step 3
+  // refiner(refiner_py_ch, pseudoalignments_ch, fasta_ch, n_max_ch)
+
+
+
 }
